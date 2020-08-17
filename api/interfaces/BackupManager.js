@@ -7,14 +7,18 @@ class BackupManager {
 
   async createBackup(cards) {
     try {
-      this.cleanCollections();
+      await this.cleanCollections();
+
       const timestamp = moment.utc().format();
       const collection = Database.db.collection(timestamp);
       const result = await collection.insertMany(cards);
       Database.lastBackupName = timestamp;
+
+      console.log("result of inserting", result);
+      console.log(`${result.insertedCount} documents inserted`);
+
       return {
         insertedCount: result.insertedCount,
-        insertedIds: result.insertedIds,
       };
     } catch (e) {
       throw e;
@@ -24,7 +28,7 @@ class BackupManager {
   async purgeBackup() {
     try {
       if (!Database.lastBackupName) {
-        throw new Error("No backups to purge");
+        throw new Error("No backup found. Purge not completed.");
       }
       this.cleanCollections();
     } catch (e) {
@@ -35,11 +39,13 @@ class BackupManager {
   async searchBackup(params) {
     try {
       if (!Database.lastBackupName) {
-        throw new Error("No backup exists");
+        throw new Error("No backup found.");
       }
 
       const collection = Database.db.collection(Database.lastBackupName);
-      const results = await collection.find({ ...params });
+
+      const cleanedParams = this.cleanParams(params);
+      const results = await collection.find(cleanedParams);
       const resultsArr = [];
 
       await results.forEach((result) => resultsArr.push(result));
@@ -52,13 +58,27 @@ class BackupManager {
   async cleanCollections() {
     try {
       const collections = await Database.db.listCollections();
-      await collections.forEach((collection) => {
-        Database.db.collection(collection.name).drop();
+      await collections.forEach(async (collection) => {
+        await Database.db.collection(collection.name).drop();
       });
       Database.lastBackupName = "";
     } catch (e) {
       throw e;
     }
+  }
+
+  cleanParams(params) {
+    const searchObj = {};
+    if (params.name) {
+      searchObj.name = params.name;
+    }
+    if (params.hp) {
+      searchObj.hp = params.hp;
+    }
+    if (params.rarity) {
+      searchObj.rarity = params.rarity;
+    }
+    return searchObj;
   }
 }
 
