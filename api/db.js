@@ -5,7 +5,7 @@ require("dotenv").config({
 });
 
 const { MongoClient } = require("mongodb");
-const mongoUri = `mongodb+srv://admin:${process.env.MONGODB_PASSWORD}@cluster0.p7hot.mongodb.net/${process.env.MONGODB_NAME}?retryWrites=true&w=majority`;
+const mongoUri = `mongodb+srv://admin:${process.env.MONGODB_PASSWORD}@cluster0.p7hot.mongodb.net/rewind?retryWrites=true&w=majority`;
 
 class Database {
   static async run() {

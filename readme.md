@@ -1,6 +1,7 @@
 ##  How to run
 
 1.  cd /api
+2.  Enter "pokemon" for MONGODB_PASSWORD in .env
 2.  Run "npm install"
 3.  Run "npm run start" to start the api server
 4.  cd /client
